@@ -2,7 +2,7 @@
 # outlet init
 # BSD0 licence
 set -eu
-VERSION=2.1.0
+VERSION=2.1.1
 trap 'echo Something went wrong, dropping to an emergency shell.;echo Good luck.;exec sh' EXIT
 byeprep() {
   printf '%s\n' 1 > /proc/sys/kernel/sysrq || return 1
@@ -119,7 +119,7 @@ case $1 in
 esac
 EOF
 chmod +x /run/outlet/udhcpc.script
-[ -n "$n" ] && out=$(udhcpc -i "$n" -b -s /run/outlet/udhcpc.script 2>&1) || { echo "$out"; }
+[ -n "$n" ] && ( out=$(udhcpc -i "$n" -b -s /run/outlet/udhcpc.script 2>&1) || { echo "$out"; } )
 
 hwclock -s||:
 
