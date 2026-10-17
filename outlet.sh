@@ -2,7 +2,7 @@
 # outlet init
 # BSD0 licence
 set -eu
-VERSION=2.3.1
+VERSION=3.0.0
 trap 'echo Something went wrong, dropping to an emergency shell.;echo Good luck.;exec sh' EXIT
 byeprep() {
   printf '%s\n' 1 > /proc/sys/kernel/sysrq || return 1
@@ -35,7 +35,7 @@ reexec() {
 }
 trap 'reexec "$0"' USR1
 trap 'reexec "sh"' QUIT
-trap 'if [ -e /run/outlet/pid1 ]; then reexec "$(cat /run/outlet/pid1)";fi' USR2
+trap 'if [ -e /run/outlet/pid1 ]; then chmod a+x /run/outlet/pid1;reexec /run/outlet/pid1;fi' USR2
 cat<<EOF
 you're __ using
  __-\-\\\\_\-\-
