@@ -2,7 +2,7 @@
 # outlet init
 # BSD0 licence
 set -eu
-VERSION=2.2.2
+VERSION=2.2.3
 trap 'echo Something went wrong, dropping to an emergency shell.;echo Good luck.;exec sh' EXIT
 byeprep() {
   printf '%s\n' 1 > /proc/sys/kernel/sysrq || return 1
@@ -26,7 +26,14 @@ reboot()   { byeprep; printf '%s' b > /proc/sysrq-trigger; }
 shutdown() { byeprep; printf '%s' o > /proc/sysrq-trigger; }
 trap reboot TERM
 trap shutdown INT
-trap 'printf \'%s\\n\' 1 > /proc/sys/kernel/sysrq;printf \'%s\' e > /proc/sysrq-trigger;sleep 2;printf \'%s\' i > /proc/sysrq-trigger;exec $0' USR1
+reexec() {
+  printf '%s\n' 1 > /proc/sys/kernel/sysrq
+  printf '%s' e > /proc/sysrq-trigger
+  sleep 2
+  printf '%s' i > /proc/sysrq-trigger
+  exec "$0"
+}
+trap reexec USR1
 cat<<EOF
 you're __ using
  __-\-\\\\_\-\-
@@ -65,6 +72,7 @@ fi
 # this program is meant to be with it's own dedicated busybox, under the name outlet so it gets treated like a symlink
 # if you do not run it like this, bad things may happen
 
+rm -rf /run/outlet
 mkdir -p /run/outlet/busybox
 cp "$0" /run/outlet/busybox/busybox
 /run/outlet/busybox/busybox --install /run/outlet/busybox
