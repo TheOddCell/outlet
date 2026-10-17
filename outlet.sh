@@ -2,7 +2,7 @@
 # outlet init
 # BSD0 licence
 set -eu
-VERSION=3.0.0
+VERSION=3.0.1
 trap 'echo Something went wrong, dropping to an emergency shell.;echo Good luck.;exec sh' EXIT
 byeprep() {
   printf '%s\n' 1 > /proc/sys/kernel/sysrq || return 1
@@ -81,7 +81,7 @@ cp "$0" /run/outlet/busybox/busybox
 PATH="/run/outlet/busybox/:$PATH" # add priority; as not exported should not apply to booted system
 
 # tmpfiles-style runtime dirs and files
-mkdir -p /run/lock /run/user /run/faillock /var/log /var/cache /var/lib /var/spool /var/tmp
+mkdir -p /run/lock /run/user /run/faillock /var/log /var/cache /var/lib /var/spool /var/tmp /etc/outlet.services.d
 chmod 1777 /tmp /var/tmp
 [ -e /var/run ] || ln -s ../run /var/run
 [ -e /var/lock ] || ln -s ../run/lock /var/lock
@@ -93,6 +93,21 @@ for f in /run/utmp /var/log/wtmp /var/log/lastlog; do
 done
 
 # hotplug n drivers
+# without an mdev.conf, mdev chmods everything in /dev to 660 root:root (breaking /dev/null for non-root)
+if [ ! -e /etc/mdev.conf ]; then
+  cat > /etc/mdev.conf <<'EOF'
+null    0:0 666
+zero    0:0 666
+full    0:0 666
+random  0:0 666
+urandom 0:0 666
+tty     0:5 666
+ptmx    0:5 666
+tty[0-9]* 0:5 620
+ttyS[0-9]* 0:5 660
+.*      0:0 660
+EOF
+fi
 if [ -e /proc/sys/kernel/hotplug ]; then
   echo /run/outlet/busybox/mdev > /proc/sys/kernel/hotplug
   /run/outlet/busybox/mdev -s
