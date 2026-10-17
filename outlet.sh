@@ -2,7 +2,7 @@
 # outlet init
 # BSD0 licence
 set -eu
-VERSION=2.3.0
+VERSION=2.3.1
 trap 'echo Something went wrong, dropping to an emergency shell.;echo Good luck.;exec sh' EXIT
 byeprep() {
   printf '%s\n' 1 > /proc/sys/kernel/sysrq || return 1
@@ -31,7 +31,7 @@ reexec() {
   printf '%s' e > /proc/sysrq-trigger
   sleep 2
   printf '%s' i > /proc/sysrq-trigger
-  exec "$1"
+  exec $1
 }
 trap 'reexec "$0"' USR1
 trap 'reexec "sh"' QUIT
